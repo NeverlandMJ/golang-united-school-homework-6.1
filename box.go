@@ -5,6 +5,9 @@ import (
 	
 )
 
+var errIndex = errors.New("index doesn't exist or index went out of the range")
+
+
 // box contains list of shapes and able to perform operations on them
 type box struct {
 	shapes         []Shape
@@ -21,11 +24,11 @@ func NewBox(shapesCapacity int) *box {
 // AddShape adds shape to the box
 // returns the error in case it goes out of the shapesCapacity range.
 func (b *box) AddShape(shape Shape) error {
-	
-	b.shapes = append(b.shapes, shape)
-	if len(b.shapes) > b.shapesCapacity{
+		
+	if len(b.shapes) + 1 > b.shapesCapacity{
 		return errors.New("shape's length goes out of shapeCapacity range")
 	}else {
+		b.shapes = append(b.shapes, shape)
 		b.shapesCapacity++
 		return nil
 	}
@@ -39,7 +42,7 @@ func (b *box) GetByIndex(i int) (Shape, error) {
 			return value, nil
 		}
 	}
-	return nil, errors.New("index doesn't exist or index went out of the range")
+	return nil, errIndex
 
 }
 
@@ -56,7 +59,7 @@ func (b *box) ExtractByIndex(i int) (Shape, error) {
 		}
 	}
 
-	return nil, errors.New("index doesn't exist or index went out of the range")
+	return nil, errIndex
 
 }
 
@@ -65,13 +68,18 @@ func (b *box) ExtractByIndex(i int) (Shape, error) {
 // ReplaceByIndex allows replacing shape by index and returns removed shape.
 // whether shape by index doesn't exist or index went out of the range, then it returns an error
 func (b *box) ReplaceByIndex(i int, shape Shape) (Shape, error) {
+	if i > len(b.shapes) {
+		return nil, errIndex
+	}
+
 	for indx, val := range b.shapes {
 		if indx == i {
 			b.shapes[i] = shape
 			return val, nil
 		}
 	}
-	return nil, errors.New("index doesn't exist or index went out of the range")
+
+	return nil, errIndex
 }
 
 // SumPerimeter provides sum perimeter of all shapes in the list.
@@ -99,13 +107,13 @@ func (b *box) SumArea() float64 {
 func (b *box) RemoveAllCircles() error {
 	crc := false
 	for _, v := range b.shapes{
-		if _, ok := v.(*Circle); !ok {
+		if _, ok := v.(Circle); !ok {
 			crc = true
 		}
 	}
 	if crc {
 		for i, v := range b.shapes{
-			if _, ok := v.(*Circle); ok {
+			if _, ok := v.(Circle); ok {
 				copy(b.shapes[i:], b.shapes[i+1:])
 				b.shapes[len(b.shapes)-1] = nil
 				b.shapes = b.shapes[:len(b.shapes)-1]
